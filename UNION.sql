@@ -18,11 +18,18 @@ USE LIBRERIA
 --Cuando vemos el detalle de una factura... es detalle_factura
 
 -- cuando queremos ver la facturacion TOTAL de un negocio es una sum(precio * cantidad)
-
 select sum(d.pre_unitario*d.cantidad) as 'FACTURACION TOTAL DEL NEGOCIO'
 from detalle_facturas d
 
 
+--mostrar los datos de cierta factura
+select df.pre_unitario*df.cantidad as 'SUBTOTAL'
+FROM facturas f JOIN detalle_facturas df ON df.nro_factura = f.nro_factura
+where f.nro_factura = 300
+
+---------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
 
 --ACTIVIDADES - GUIA UNION 
 --Listar ordenando alfabeticamente por apellido y nombre, primero los vendedores y luego los clientes
@@ -36,14 +43,57 @@ from vendedores
 --2. Se quiere saber qué vendedores y clientes hay en la empresa; para los casos en 
 --que su teléfono y dirección de e-mail sean conocidos. Se deberá visualizar el 
 --código, nombre y si se trata de un cliente o de un vendedor. Ordene por la 
---columna tercera y segunda.select  cod_cliente as 'CODIGO', nom_cliente +' '+ape_cliente as 'NOMBRE Y APELLIDO', nro_tel as 'TELEFONO' ,  [e-mail] as 'CORREO ELECTRONICO',
+--columna tercera y segunda.
+
+
+select  cod_cliente as 'CODIGO', nom_cliente +' '+ape_cliente as 'NOMBRE Y APELLIDO', nro_tel as 'TELEFONO' ,  [e-mail] as 'CORREO ELECTRONICO',
 'CLIENTE' as tipo 
-from clientes where nro_tel is not null and  [e-mail] is not null unionselect cod_vendedor as 'CODIGO',  nom_vendedor +' '+ape_vendedor as 'NOMBRE Y APELLIDO', nro_tel as 'TELEFONO' , [e-mail] as 'CORREO ELECTRONICO','VENDEDOR' as tipo from vendedores where nro_tel is not null and  [e-mail] is not null order by 3, 2--3. Emitir un listado donde se muestren qué artículos, clientes y vendedores hay en
---la empresa. Determine los campos a mostrar y su ordenamiento.select cod_cliente as 'CODIGO', nom_cliente as 'NOMBRE' , 'CLIENTE' as 'TIPO'from clientes unionselect cod_vendedor , nom_vendedor , 'VENDEDOR' as 'TIPO'from vendedoresunion select cod_articulo , observaciones , 'ARTICULO' as 'TIPO'from articulos select * from clientes--4. Se quiere saber las direcciones (incluido el barrio) tanto de clientes como de
+from clientes 
+where nro_tel is not null and  [e-mail] is not null 
+union
+select cod_vendedor as 'CODIGO',  nom_vendedor +' '+ape_vendedor as 'NOMBRE Y APELLIDO', nro_tel as 'TELEFONO' , [e-mail] as 'CORREO ELECTRONICO',
+'VENDEDOR' as tipo 
+from vendedores 
+where nro_tel is not null and  [e-mail] is not null 
+order by 3, 2
+
+
+--3. Emitir un listado donde se muestren qué artículos, clientes y vendedores hay en
+--la empresa. Determine los campos a mostrar y su ordenamiento.
+
+
+select cod_cliente as 'CODIGO', nom_cliente as 'NOMBRE' , 'CLIENTE' as 'TIPO'
+from clientes 
+union
+select cod_vendedor , nom_vendedor , 'VENDEDOR' as 'TIPO'
+from vendedores
+union 
+select cod_articulo , observaciones , 'ARTICULO' as 'TIPO'
+from articulos 
+
+
+select * from clientes
+
+
+--4. Se quiere saber las direcciones (incluido el barrio) tanto de clientes como de
 --vendedores. Para el caso de los vendedores, códigos entre 3 y 12. En ambos
 --casos las direcciones deberán ser conocidas. Rotule como NOMBRE,
 --DIRECCION, BARRIO, INTEGRANTE (en donde indicará si es cliente o vendedor).
---Ordenado por la primera y la última columna.Select cod_cliente as CODIGO, nom_cliente as NOMBRE, c.calle+', '+convert(varchar,c.altura) as DIRECCION,b.barrio as BARRIO , 'CLIENTE' AS 'TIPO'from clientes c join barrios b  on b.cod_barrio = c.cod_barrioUNION Select cod_vendedor as CODIGO, nom_vendedor as NOMBRE, v.calle+', '+convert(varchar,v.altura) as DIRECCION, b.barrio as BARRIO , 'VENDEDOR' AS 'TIPO'from vendedores v join barrios b  on b.cod_barrio = v.cod_barriowhere v.cod_vendedor between 3 and 12 and calle  IS NOT NULL and altura is not null --5. Ídem al ejercicio anterior, sólo que además del código, identifique de donde 
+--Ordenado por la primera y la última columna.
+
+
+Select cod_cliente as CODIGO, nom_cliente as NOMBRE, c.calle+', '+convert(varchar,c.altura) as DIRECCION,
+b.barrio as BARRIO , 'CLIENTE' AS 'TIPO'
+from clientes c join barrios b  on b.cod_barrio = c.cod_barrio
+UNION 
+Select cod_vendedor as CODIGO, nom_vendedor as NOMBRE, v.calle+', '+convert(varchar,v.altura) as DIRECCION, b.barrio as BARRIO , 
+'VENDEDOR' AS 'TIPO'
+from vendedores v join barrios b  on b.cod_barrio = v.cod_barrio
+where v.cod_vendedor between 3 and 12 and calle  IS NOT NULL and altura is not null 
+
+
+
+--5. Ídem al ejercicio anterior, sólo que además del código, identifique de donde 
 --obtiene la información (de qué tabla se obtienen los datos)
 
 Select convert(varchar, c.cod_cliente) + ' - TABLA CLIENTES' as CODIGO,
@@ -63,7 +113,10 @@ select convert(varchar, v.cod_vendedor) + ' - TABLA VENDEDORES',
 from vendedores v join barrios b on b.cod_barrio = v.cod_barrio
 where v.cod_vendedor between 3 and 12 and v.calle is not null and v.altura is not
 null
-order by 1, 4--6. Listar todos los artículos que están a la venta cuyo precio unitario oscile entre 10
+order by 1, 4
+
+
+--6. Listar todos los artículos que están a la venta cuyo precio unitario oscile entre 10
 --y 50; también se quieren listar los artículos que fueron comprados por los
 --clientes cuyos apellidos comiencen con “M” o con “P”.
 
@@ -83,7 +136,8 @@ where nom_cliente like '[p,m%]'
 ----7 El encargado del negocio quiere saber cuánto fue la facturación del año pasado.
 --Por otro lado, cuánto es la facturación del mes pasado, la de este mes y la de
 --hoy (Cada pedido en una consulta distinta, y puede unirla en una sola tabla de
---resultado)
+--resultado)
+
 
 --cuanto fue la facturacion del negocio ?
 
@@ -100,10 +154,13 @@ UNION
 SELECT SUM(df.cantidad * df.pre_unitario) AS 'Facturacion total', 'Este mes' AS 'Fecha'
 FROM facturas f
 JOIN detalle_facturas df ON df.nro_factura = f.nro_factura
-where month(fecha)=month(GETDATE()) and YEAR(fecha)=YEAR(GETDATE())UNION select sum(d.pre_unitario*d.cantidad) AS 'Facturacion total', 'Este dia' AS 'Fecha'
+where month(fecha)=month(GETDATE()) and YEAR(fecha)=YEAR(GETDATE())
+UNION 
+select sum(d.pre_unitario*d.cantidad) AS 'Facturacion total', 'Este dia' AS 'Fecha'
 from detalle_facturas d join facturas f on d.nro_factura=f.nro_factura
 where day(fecha)=day(GETDATE()) and month(fecha)=month(GETDATE()) and YEAR(fecha)
-=YEAR(GETDATE())
+=YEAR(GETDATE())
+
 
 
 
